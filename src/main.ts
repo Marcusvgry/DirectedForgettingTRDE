@@ -1,7 +1,7 @@
 import { initJsPsych } from "jspsych";
 import "jspsych/css/jspsych.css";
 import "@jspsych/plugin-survey/css/survey.css";
-import "../styles/main.css";
+import "./styles/main.css";
 import "./styles/jspsych-overrides.css";
 import { buildTimeline } from "./experiment/timeline";
 import { saveStudyData } from "./experiment/data/save";

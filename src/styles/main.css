@@ -15,3 +15,55 @@
 .instructions p {
   margin-bottom: 1em;
 }
+
+.language-block {
+  margin: 1em 0;
+  padding: 0.5em 1em;
+  border-left: 4px solid #ddd;
+}
+
+.language-block h3 {
+  margin-top: 0;
+  font-size: 18px;
+}
+
+.word {
+  font-size: 48px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.fixation {
+  font-size: 48px;
+  font-weight: 600;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.cue {
+  font-size: 64px;
+  font-weight: 700;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.cue-remember {
+  color: #1b8f2e;
+}
+
+.cue-forget {
+  color: #c23b22;
+}
+
+.prompt {
+  margin-top: 24px;
+  font-size: 18px;
+}
