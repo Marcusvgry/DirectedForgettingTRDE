@@ -1,7 +1,9 @@
 import { defineConfig } from "vite";
 
 export default defineConfig({
+  base: "/DirectedForgettingTRDE/",
   build: {
+    outDir: "docs",
     sourcemap: true,
   },
   server: {
