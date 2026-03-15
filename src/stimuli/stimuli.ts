@@ -188,10 +188,11 @@ const wordPairs: WordPair[] = [
   { de: "Kunde", tr: "Müşteri" },
 ];
 
-// Hinweis: Da die gelbe Markierung aus dem eingebrachten Text nicht übermittelt wurde,
-// werden die ersten 80 Paare als Lernwörter und die restlichen als neue Wörter verwendet.
+// Die ersten 80 Paare als Lernwörter, die nächsten als neue Wörter im Recognition-Test,
+// die letzten 8 Paare als separate Übungswörter (kommen im Hauptexperiment nicht vor).
+const practicePairs = wordPairs.slice(wordPairs.length - 8);
 const studyPairs = wordPairs.slice(0, 80);
-const newPairs = wordPairs.slice(80);
+const newPairs = wordPairs.slice(80, wordPairs.length - 8);
 
 export const stimuli = {
   de: {
@@ -205,6 +206,6 @@ export const stimuli = {
 };
 
 export const practiceStimuli = {
-  de: studyPairs.slice(0, 6).map((pair) => pair.de),
-  tr: studyPairs.slice(0, 6).map((pair) => pair.tr),
+  de: practicePairs.map((pair) => pair.de),
+  tr: practicePairs.map((pair) => pair.tr),
 };
