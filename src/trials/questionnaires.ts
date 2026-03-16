@@ -35,7 +35,7 @@ export const demographicPages = [
       {
         type: "text",
         title:
-          "Aktueller Wohnort (Stadt/Land) / Şu anki yaşadığınız yer (Şehir/Ülke)",
+          "Aktueller Wohnort / Şu anki yaşadığınız yer",
         name: "current_residence",
         isRequired: true,
       },

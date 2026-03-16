@@ -11,7 +11,6 @@ const jsPsych = initJsPsych({
   display_element: "jspsych-target",
   on_finish: async () => {
     if (studyConfig.testMode) {
-      // Local CSV download
       const csv = jsPsych.data.get().csv();
       const blob = new Blob([csv], { type: "text/csv" });
       const url = URL.createObjectURL(blob);

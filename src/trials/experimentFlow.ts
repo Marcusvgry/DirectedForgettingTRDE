@@ -8,6 +8,12 @@ import { studyConfig } from "../experiment/config";
 
 type LanguageCode = "de" | "tr";
 type ParticipantGroup = "monolingual" | "late_bilingual" | "ineligible";
+type ParticipantGroupLabel =
+  | "monoling_DE"
+  | "monoling_TR"
+  | "biling_Mixed"
+  | "biling_Same"
+  | "ineligible";
 type TaskVersion = "coupled" | "mixed" | "monolingual" | null;
 type InstructionMode = "de" | "tr" | "both";
 
@@ -251,14 +257,50 @@ const assignParticipant = (
     state.taskVersion = "monolingual";
   }
 
-  jsPsych.data.addProperties({
+  applyParticipantDataProperties(jsPsych, state);
+};
+
+const resolveParticipantGroupLabel = (
+  state: ParticipantState,
+): ParticipantGroupLabel => {
+  if (state.group === "monolingual") {
+    if (state.nativeLanguage === "de") return "monoling_DE";
+    if (state.nativeLanguage === "tr") return "monoling_TR";
+    return "ineligible";
+  }
+
+  if (state.group === "late_bilingual") {
+    if (state.taskVersion === "mixed") return "biling_Mixed";
+    if (state.taskVersion === "coupled") return "biling_Same";
+    return "ineligible";
+  }
+
+  return "ineligible";
+};
+
+const applyParticipantDataProperties = (
+  jsPsych: JsPsych,
+  state: ParticipantState,
+) => {
+  const groupLabel = resolveParticipantGroupLabel(state);
+  const properties = {
     participant_id: state.participantId,
-    group: state.group,
+    group: groupLabel,
+    participant_group: groupLabel,
+    group_internal: state.group,
     task_version: state.taskVersion ?? "unknown",
     native_language: state.nativeLanguage ?? "unknown",
     tbr_language: state.tbrLanguage ?? "none",
     tbf_language: state.tbfLanguage ?? "none",
-  });
+  };
+
+  jsPsych.data.addProperties(properties);
+
+  // Ensure already-recorded rows in test mode (e.g., selector/welcome) also receive the same metadata.
+  const allData = jsPsych.data.get() as any;
+  if (typeof allData?.addToAll === "function") {
+    allData.addToAll(properties);
+  }
 };
 
 const getInstructionModeForGeneral = (state: ParticipantState) => {
@@ -760,6 +802,8 @@ const buildTestModeSelector = (jsPsych: JsPsych, state: ParticipantState) => ({
       } else {
         state.taskVersion = "monolingual";
       }
+
+      applyParticipantDataProperties(jsPsych, state);
 
       jsPsych.finishTrial();
     });
