@@ -34,15 +34,14 @@ export const demographicPages = [
       },
       {
         type: "text",
-        title:
-          "Aktueller Wohnort / Şu anki yaşadığınız yer",
+        title: "Aktueller Wohnort / Şu anki yaşadığınız yer",
         name: "current_residence",
         isRequired: true,
       },
       {
         type: "text",
         title:
-          "In welchen Ländern haben Sie bisher länger gelebt? / Hangi ülkelerde daha uzun süre yaşadınız?",
+          "In welchen anderen Ländern haben Sie bisher länger gelebt? / Başka hangi ülkelerde uzun süre yaşadınız?",
         name: "countries_lived",
         isRequired: true,
       },
@@ -268,7 +267,7 @@ export const languageBackgroundPages = [
       {
         type: "radiogroup",
         title:
-          "Welche Sprache sprechen Sie überwiegend an der Uni / Arbeit? / Üniversitede / işte ağırlıklı olarak hangi dili konuşuyorsunuz?",
+          "Welche Sprache sprechen Sie überwiegend an der Schule / Uni / Arbeit? okul / Üniversitede / işte ağırlıklı olarak hangi dili konuşuyorsunuz?",
         name: "language_work",
         isRequired: true,
         choices: [
