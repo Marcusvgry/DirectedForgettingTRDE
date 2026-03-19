@@ -127,6 +127,44 @@ const getInstructionHtml = (key: string, mode: InstructionMode) => {
   return wrapInstructions(text);
 };
 
+const getRecognitionResponseLabels = (mode: InstructionMode) => {
+  if (mode === "de") {
+    return { old: "Alt", new: "Neu" };
+  }
+  if (mode === "tr") {
+    return { old: "Eski", new: "Yeni" };
+  }
+  return { old: "Alt/Eski", new: "Neu/Yeni" };
+};
+
+const getRecognitionPromptHtml = (mode: InstructionMode) => {
+  const labels = getRecognitionResponseLabels(mode);
+  return `
+    <div class="recognition-response-panel">
+      <div class="recognition-response-buttons">
+        <button
+          type="button"
+          class="recognition-response-button"
+          data-response-key="${keyMap.old}"
+          aria-label="${labels.old} (${keyMap.old.toUpperCase()})"
+        >
+          <span class="recognition-response-key">${keyMap.old.toUpperCase()}</span>
+          <span class="recognition-response-label">${labels.old}</span>
+        </button>
+        <button
+          type="button"
+          class="recognition-response-button"
+          data-response-key="${keyMap.new}"
+          aria-label="${labels.new} (${keyMap.new.toUpperCase()})"
+        >
+          <span class="recognition-response-key">${keyMap.new.toUpperCase()}</span>
+          <span class="recognition-response-label">${labels.new}</span>
+        </button>
+      </div>
+    </div>
+  `;
+};
+
 const buildInstructionSurvey = (html: string, mode: InstructionMode) => {
   const buttons = getButtonLabels(mode);
   return {
@@ -665,13 +703,7 @@ const buildDistractor = (state: ParticipantState) => {
 const buildRecognitionBlock = (jsPsych: JsPsych, state: ParticipantState) => {
   const responsePrompt = () => {
     const mode = getInstructionModeForRecognition(state);
-    if (mode === "de") {
-      return '<div class="prompt">Alt: F &nbsp;&nbsp; Neu: J</div>';
-    }
-    if (mode === "tr") {
-      return '<div class="prompt">Eski: F &nbsp;&nbsp; Yeni: J</div>';
-    }
-    return '<div class="prompt">Alt/Eski: F &nbsp;&nbsp; Neu/Yeni: J</div>';
+    return getRecognitionPromptHtml(mode);
   };
 
   const trial: any = {
@@ -679,6 +711,22 @@ const buildRecognitionBlock = (jsPsych: JsPsych, state: ParticipantState) => {
     stimulus: jsPsych.timelineVariable("word"),
     choices: [keyMap.old, keyMap.new],
     prompt: responsePrompt,
+    on_load: () => {
+      const displayElement = jsPsych.getDisplayElement();
+      const buttons = displayElement.querySelectorAll<HTMLButtonElement>(
+        ".recognition-response-button",
+      );
+
+      buttons.forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.preventDefault();
+          const responseKey = button.dataset.responseKey;
+          if (responseKey) {
+            jsPsych.pluginAPI.pressKey(responseKey);
+          }
+        });
+      });
+    },
     data: {
       phase: "recognition",
       word: jsPsych.timelineVariable("wordText"),
