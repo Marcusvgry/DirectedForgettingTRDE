@@ -1,10 +1,15 @@
 export const studyConfig = {
-  debug: true,
+  debug: false,
   dataEndpoint: "/data",
 
   /**
-   * Testmodus: true = Trial-Auswahl, optionale Felder,
-   * lokaler CSV-Download, manuelle Gruppenwahl.
+   * Testmodus: true = optionale Felder und lokaler CSV-Download am Ende.
    */
   testMode: true,
+
+  /**
+   * Zeigt die Test-Auswahlseite am Anfang.
+   * Bei false bleibt der lokale CSV-Download am Ende aktiv.
+   */
+  showTestModeSelector: false,
 };
