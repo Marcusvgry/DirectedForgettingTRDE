@@ -12,3 +12,27 @@
 .sd-question__required-text {
   display: none !important;
 }
+
+.sd-question[data-name="consent_ack"] {
+  margin-top: 4px !important;
+  margin-bottom: 0 !important;
+}
+
+.sd-question[data-name="consent_ack"] .sd-item {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.sd-question[data-name="consent_ack"] .sd-item__control-label,
+.sd-question[data-name="consent_ack"]
+  .sd-item__control-label
+  .sv-string-viewer {
+  white-space: pre-line !important;
+  line-height: 1.25 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.sd-question[data-name="consent_ack"] .sd-item__decorator {
+  margin-top: 0 !important;
+}

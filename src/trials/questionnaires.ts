@@ -7,6 +7,10 @@ export const demographicPages = [
       {
         type: "text",
         title: "Wie alt sind Sie? / Kaç yaşındasınız?",
+<<<<<<< Updated upstream
+=======
+        placeholder: "Alter / Yas",
+>>>>>>> Stashed changes
         name: "age",
         inputType: "number",
         min: 1,
@@ -45,6 +49,22 @@ export const demographicPages = [
         name: "countries_lived",
         isRequired: true,
       },
+      {
+        type: "text",
+        title: "Herkunftsland / Doğduğunuz ülke",
+        name: "country_of_origin",
+      },
+      {
+        type: "text",
+        title: "Aktueller Wohnort / Şu anki yaşadığınız yer",
+        name: "current_residence",
+      },
+      {
+        type: "comment",
+        title:
+          "In welchen Ländern haben Sie bisher länger gelebt? / Hangi ülkelerde daha uzun süre yaşadınız?",
+        name: "countries_lived_longer",
+      },
     ],
   },
 ];
@@ -60,7 +80,11 @@ export const languageBackgroundPages = [
         type: "checkbox",
         title:
           "Welche Sprachen sprechen Sie im Alltag regelmäßig? / Günlük hayatta hangi dilleri düzenli konuşuyorsunuz?",
+<<<<<<< Updated upstream
         name: "languages_spoken",
+=======
+        name: "regular_languages",
+>>>>>>> Stashed changes
         isRequired: true,
         choices: [
           { value: "de", text: "Deutsch / Almanca" },
@@ -70,6 +94,7 @@ export const languageBackgroundPages = [
         colCount: 0,
       },
       {
+<<<<<<< Updated upstream
         type: "text",
         title: "Falls andere: Welche? / Diğer ise hangisi?",
         name: "languages_spoken_other",
@@ -104,15 +129,37 @@ export const languageBackgroundPages = [
         max: 120,
         isRequired: true,
         visibleIf: "{languages_spoken} contains 'de'",
+=======
+        type: "radiogroup",
+        title:
+          "Welche ist Ihre Erstsprache / Muttersprache? / Ana diliniz / ilk diliniz hangisi?",
+        name: "first_language",
+        isRequired: true,
+        choices: [
+          { value: "de", text: "Deutsch / Almanca" },
+          { value: "tr", text: "Türkisch / Türkçe" },
+          { value: "other", text: "Andere / Diğer" },
+        ],
+        colCount: 0,
+>>>>>>> Stashed changes
       },
       {
         type: "text",
         title:
+<<<<<<< Updated upstream
           "In welchem Alter haben Sie Türkisch erworben? / Türkçeyi kaç yaşında öğrendiniz?",
         name: "age_acquisition_tr",
         inputType: "number",
         min: 0,
         max: 120,
+=======
+          "In welchem Alter haben Sie Deutsch erworben? / Almancayı kaç yaşında öğrendiniz?",
+        name: "acquisition_age_de",
+        inputType: "number",
+        min: 0,
+        max: 120,
+        visibleIf: "{regular_languages} contains 'de'",
+>>>>>>> Stashed changes
         isRequired: true,
         visibleIf: "{languages_spoken} contains 'tr'",
       },
@@ -251,6 +298,191 @@ export const languageBackgroundPages = [
         visibleIf: "{languages_spoken} contains 'tr'",
       },
       {
+        type: "text",
+        title:
+          "In welchem Alter haben Sie Türkisch erworben? / Türkçeyi kaç yaşında öğrendiniz?",
+        name: "acquisition_age_tr",
+        inputType: "number",
+        min: 0,
+        max: 120,
+        visibleIf: "{regular_languages} contains 'tr'",
+        isRequired: true,
+      },
+    ],
+  },
+  {
+    name: "language_competence",
+    title: "Sprachkompetenz / Dil Yetkinliği",
+    description:
+      "Bitte schätzen Sie Ihre Sprachkompetenz auf einer Skala von 0 (keine Kenntnisse) bis 100 (muttersprachlich) ein. / Lütfen dil yetkinliğinizi 0 (bilgi yok) ile 100 (anadil düzeyi) arasında değerlendirin.",
+    elements: [
+      {
+        type: "html",
+        name: "language_competence_caption",
+        html: "<p>Die folgenden Fragen erscheinen fuer die in der Alltagsfrage ausgewaehlten Sprachen. / Asagidaki sorular gunluk dil seciminde isaretlenen diller icin gorunur.</p>",
+      },
+      {
+        type: "html",
+        name: "language_competence_caption_de",
+        html: "<p><strong>Deutsch / Almanca</strong></p>",
+        visibleIf: "{regular_languages} contains 'de'",
+      },
+      {
+        type: "text",
+        title: "Sprechen / Konuşma (Deutsch)",
+        name: "de_speaking",
+        inputType: "number",
+        min: 0,
+        max: 100,
+        placeholder: "0-100",
+        visibleIf: "{regular_languages} contains 'de'",
+      },
+      {
+        type: "text",
+        title: "Verstehen / Anlama (Deutsch)",
+        name: "de_understanding",
+        inputType: "number",
+        min: 0,
+        max: 100,
+        placeholder: "0-100",
+        visibleIf: "{regular_languages} contains 'de'",
+      },
+      {
+        type: "text",
+        title: "Lesen / Okuma (Deutsch)",
+        name: "de_reading",
+        inputType: "number",
+        min: 0,
+        max: 100,
+        placeholder: "0-100",
+        visibleIf: "{regular_languages} contains 'de'",
+      },
+      {
+        type: "text",
+        title: "Schreiben / Yazma (Deutsch)",
+        name: "de_writing",
+        inputType: "number",
+        min: 0,
+        max: 100,
+        placeholder: "0-100",
+        visibleIf: "{regular_languages} contains 'de'",
+      },
+      {
+        type: "html",
+        name: "language_competence_caption_tr",
+        html: "<p><strong>Türkisch / Türkçe</strong></p>",
+        visibleIf: "{regular_languages} contains 'tr'",
+      },
+      {
+        type: "text",
+        title: "Sprechen / Konuşma (Türkisch)",
+        name: "tr_speaking",
+        inputType: "number",
+        min: 0,
+        max: 100,
+        placeholder: "0-100",
+        visibleIf: "{regular_languages} contains 'tr'",
+      },
+      {
+        type: "text",
+        title: "Verstehen / Anlama (Türkisch)",
+        name: "tr_understanding",
+        inputType: "number",
+        min: 0,
+        max: 100,
+        placeholder: "0-100",
+        visibleIf: "{regular_languages} contains 'tr'",
+      },
+      {
+        type: "text",
+        title: "Lesen / Okuma (Türkisch)",
+        name: "tr_reading",
+        inputType: "number",
+        min: 0,
+        max: 100,
+        placeholder: "0-100",
+        visibleIf: "{regular_languages} contains 'tr'",
+      },
+      {
+        type: "text",
+        title: "Schreiben / Yazma (Türkisch)",
+        name: "tr_writing",
+        inputType: "number",
+        min: 0,
+        max: 100,
+        placeholder: "0-100",
+        visibleIf: "{regular_languages} contains 'tr'",
+      },
+    ],
+  },
+  {
+    name: "language_use",
+    title: "Sprachverwendung / Dil Kullanımı",
+    description:
+      "Bitte geben Sie an, wie häufig und in welchen Kontexten Sie Deutsch und Türkisch verwenden. / Lütfen Almanca ve Türkçeyi ne sıklıkta ve hangi bağlamlarda kullandığınızı belirtin.",
+    elements: [
+      {
+        type: "text",
+        title:
+          "Wie viel Prozent Ihres Alltags verwenden Sie Deutsch? / Günlük hayatınızın yüzde kaçında Almanca kullanıyorsunuz?",
+        name: "daily_german_percentage",
+        inputType: "number",
+        min: 0,
+        max: 100,
+        placeholder: "0-100",
+        visibleIf: "{regular_languages} contains 'de'",
+      },
+      {
+        type: "text",
+        title:
+          "Wie viel Prozent Ihres Alltags verwenden Sie Türkisch? / Günlük hayatınızın yüzde kaçında Türkçe kullanıyorsunuz?",
+        name: "daily_turkish_percentage",
+        inputType: "number",
+        min: 0,
+        max: 100,
+        placeholder: "0-100",
+        visibleIf: "{regular_languages} contains 'tr'",
+      },
+      {
+        type: "radiogroup",
+        title:
+          "Welche Sprache sprechen Sie überwiegend zu Hause? / Evde ağırlıklı olarak hangi dili konuşuyorsunuz?",
+        name: "home_language",
+        choices: [
+          { value: "de", text: "Deutsch / Almanca" },
+          { value: "tr", text: "Türkisch / Türkçe" },
+          { value: "both", text: "Beide gleich / Her ikisi eşit" },
+          { value: "other", text: "Andere / Diğer" },
+        ],
+        colCount: 0,
+      },
+      {
+        type: "radiogroup",
+        title:
+          "Welche Sprache sprechen Sie überwiegend an der Uni / Arbeit? / Üniversitede / işte ağırlıklı olarak hangi dili konuşuyorsunuz?",
+        name: "work_language",
+        choices: [
+          { value: "de", text: "Deutsch / Almanca" },
+          { value: "tr", text: "Türkisch / Türkçe" },
+          { value: "both", text: "Beide gleich / Her ikisi eşit" },
+          { value: "other", text: "Andere / Diğer" },
+        ],
+        colCount: 0,
+      },
+      {
+        type: "radiogroup",
+        title:
+          "Welche Sprache sprechen Sie überwiegend mit Freunden? / Arkadaşlarınızla ağırlıklı olarak hangi dili konuşuyorsunuz?",
+        name: "friends_language",
+        choices: [
+          { value: "de", text: "Deutsch / Almanca" },
+          { value: "tr", text: "Türkisch / Türkçe" },
+          { value: "both", text: "Beide gleich / Her ikisi eşit" },
+          { value: "other", text: "Andere / Diğer" },
+        ],
+        colCount: 0,
+      },
+      {
         type: "radiogroup",
         title:
           "Welche Sprache sprechen Sie überwiegend zu Hause? / Evde ağırlıklı olarak hangi dili konuşuyorsunuz?",
@@ -291,6 +523,11 @@ export const languageBackgroundPages = [
           { value: "other", text: "Andere / Diğer" },
         ],
         colCount: 0,
+<<<<<<< Updated upstream
+=======
+        visibleIf:
+          "{regular_languages} contains 'de' and {regular_languages} contains 'tr'",
+>>>>>>> Stashed changes
       },
     ],
   },

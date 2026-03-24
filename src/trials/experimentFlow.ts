@@ -16,6 +16,15 @@ type ParticipantGroupLabel =
   | "ineligible";
 type TaskVersion = "coupled" | "mixed" | "monolingual" | null;
 type InstructionMode = "de" | "tr" | "both";
+type DebugPart =
+  | "welcome"
+  | "background"
+  | "practice"
+  | "practice_recognition"
+  | "main_learning"
+  | "distractor"
+  | "recognition"
+  | "end";
 
 type StudyItem = {
   word: string;
@@ -27,7 +36,8 @@ type TestItem = {
   word: string;
   language: LanguageCode;
   target: "old" | "new";
-  itemStatus: "TBR" | "TBF" | null;
+  itemStatus: "TBR" | "TBF" | "neu";
+  serialPosition: number;
 };
 
 type TestModeSelection = {
@@ -46,9 +56,26 @@ type ParticipantState = {
   eligible: boolean;
   studyItems: StudyItem[];
   practiceItems: StudyItem[];
+  practiceTestItems: TestItem[];
   testItems: TestItem[];
+<<<<<<< Updated upstream
   testModeSelection: TestModeSelection | null;
+=======
+  debugManualMode: boolean;
+  debugParts: DebugPart[];
+>>>>>>> Stashed changes
 };
+
+const debugPartValues: DebugPart[] = [
+  "welcome",
+  "background",
+  "practice",
+  "practice_recognition",
+  "main_learning",
+  "distractor",
+  "recognition",
+  "end",
+];
 
 const keyMap = { old: "f", new: "j" };
 const timings = {
@@ -78,8 +105,14 @@ const createParticipantState = (): ParticipantState => ({
   eligible: false,
   studyItems: [],
   practiceItems: [],
+  practiceTestItems: [],
   testItems: [],
+<<<<<<< Updated upstream
   testModeSelection: null,
+=======
+  debugManualMode: false,
+  debugParts: [],
+>>>>>>> Stashed changes
 });
 
 const makeParticipantId = () => {
@@ -127,6 +160,7 @@ const getInstructionHtml = (key: string, mode: InstructionMode) => {
   return wrapInstructions(text);
 };
 
+<<<<<<< Updated upstream
 const getRecognitionResponseLabels = (mode: InstructionMode) => {
   if (mode === "de") {
     return { old: "Alt", new: "Neu" };
@@ -166,22 +200,52 @@ const getRecognitionPromptHtml = (mode: InstructionMode) => {
 };
 
 const buildInstructionSurvey = (html: string, mode: InstructionMode) => {
+=======
+const buildInstructionSurvey = (
+  html: string,
+  mode: InstructionMode,
+  includeConsentCheckbox = false,
+) => {
+>>>>>>> Stashed changes
   const buttons = getButtonLabels(mode);
+  const elements: any[] = [
+    {
+      type: "html",
+      name: "instruction_text",
+      html,
+    },
+  ];
+
+  if (includeConsentCheckbox) {
+    elements.push({
+      type: "checkbox",
+      name: "consent_ack",
+      title: "",
+      titleLocation: "hidden",
+      isRequired: true,
+      choices: [
+        {
+          value:
+            "Hiermit bestätige ich die Informationen gelesen zu haben, und stimme der Nutzung meiner Daten zu Forschungszwecken zu.",
+          text: "Hiermit bestätige ich die Informationen gelesen zu haben, und stimme der Nutzung meiner Daten zu Forschungszwecken zu.\nBilgilendirmeyi okudugumu ve verilerimin arastirma amaciyla kullanilmasini kabul ettigimi onayliyorum.",
+        },
+      ],
+    });
+  }
+
   return {
     ...surveyDefaults,
     pageNextText: buttons.next,
     pagePrevText: buttons.prev,
+<<<<<<< Updated upstream
     completeText: buttons.complete,
+=======
+    completeText: buttons.next,
+>>>>>>> Stashed changes
     pages: [
       {
         name: "instructions",
-        elements: [
-          {
-            type: "html",
-            name: "instruction_text",
-            html,
-          },
-        ],
+        elements,
       },
     ],
   };
@@ -191,6 +255,7 @@ const makeInstructionTrial = (
   key: string,
   modeGetter: () => InstructionMode,
   block: string,
+  includeConsentCheckbox = false,
 ) => ({
   type: surveyPlugin,
   data: { block },
@@ -200,10 +265,12 @@ const makeInstructionTrial = (
     trial.survey_json = buildInstructionSurvey(
       getInstructionHtml(key, mode),
       mode,
+      includeConsentCheckbox,
     );
   },
 });
 
+<<<<<<< Updated upstream
 const stripRequired = (pages: any[]) =>
   pages.map((page: any) => ({
     ...page,
@@ -238,12 +305,200 @@ const makeBackgroundSurvey = (jsPsych: JsPsych, state: ParticipantState) => {
     },
   };
 };
+=======
+const setRequiredForBackgroundPages = (pages: any[], required: boolean) =>
+  pages.map((page) => ({
+    ...page,
+    elements: (page.elements ?? []).map((element: any) => {
+      if (element.type === "html") {
+        return element;
+      }
+      return {
+        ...element,
+        isRequired: required,
+      };
+    }),
+  }));
+
+const makeBackgroundSurvey = (jsPsych: JsPsych, state: ParticipantState) => ({
+  type: surveyPlugin,
+  data: { block: "background" },
+  survey_json: {
+    ...surveyDefaults,
+    pageNextText: "Weiter / Devam",
+    pagePrevText: "Zurueck / Geri",
+    pages: setRequiredForBackgroundPages(
+      [...demographicPages, ...languageBackgroundPages],
+      !studyConfig.debug,
+    ),
+  },
+  on_finish: (data: any) => {
+    if (state.debugManualMode) {
+      return;
+    }
+    const response = data?.response ?? {};
+    assignParticipant(jsPsych, state, response);
+  },
+});
+>>>>>>> Stashed changes
+
+const makeDebugSetupSurvey = (jsPsych: JsPsych, state: ParticipantState) => ({
+  type: surveyPlugin,
+  data: { block: "debug_setup" },
+  survey_json: {
+    ...surveyDefaults,
+    pageNextText: "Start",
+    pagePrevText: "Zurueck",
+    completeText: "Start",
+    pages: [
+      {
+        name: "debug_setup",
+        title: "Debug/Testmodus",
+        description:
+          "Waehle Gruppe und Studienteile aus. Im Debugmodus werden Eligibility-Pruefungen uebersprungen.",
+        elements: [
+          {
+            type: "checkbox",
+            name: "debug_parts",
+            title: "Welche Teile moechtest du testen?",
+            isRequired: true,
+            choices: [
+              { value: "welcome", text: "Begruessung" },
+              { value: "background", text: "Hintergrundfragen" },
+              { value: "practice", text: "Uebungsdurchgang" },
+              {
+                value: "practice_recognition",
+                text: "Recognition nach Uebung",
+              },
+              { value: "main_learning", text: "Haupt-Lerndurchgang" },
+              { value: "distractor", text: "Distraktoraufgabe" },
+              { value: "recognition", text: "Haupt-Recognition" },
+              { value: "end", text: "Abschlussseite" },
+            ],
+            defaultValue: [...debugPartValues],
+          },
+          {
+            type: "radiogroup",
+            name: "debug_group",
+            title: "Gruppe",
+            isRequired: true,
+            choices: [
+              { value: "monolingual", text: "Monolingual" },
+              { value: "late_bilingual", text: "Late bilingual" },
+            ],
+            defaultValue: "late_bilingual",
+            colCount: 0,
+          },
+          {
+            type: "radiogroup",
+            name: "debug_native_language",
+            title: "Hauptsprache fuer Instruktionen",
+            isRequired: true,
+            choices: [
+              { value: "de", text: "Deutsch" },
+              { value: "tr", text: "Tuerkisch" },
+            ],
+            defaultValue: "de",
+            colCount: 2,
+          },
+          {
+            type: "radiogroup",
+            name: "debug_task_version",
+            title: "Task-Version (nur bei late bilingual)",
+            choices: [
+              { value: "coupled", text: "Coupled" },
+              { value: "mixed", text: "Mixed" },
+            ],
+            defaultValue: "mixed",
+            visibleIf: "{debug_group} = 'late_bilingual'",
+            colCount: 2,
+          },
+          {
+            type: "radiogroup",
+            name: "debug_tbr_language",
+            title: "TBR-Sprache (nur coupled)",
+            choices: [
+              { value: "de", text: "Deutsch" },
+              { value: "tr", text: "Tuerkisch" },
+            ],
+            defaultValue: "de",
+            visibleIf:
+              "{debug_group} = 'late_bilingual' and {debug_task_version} = 'coupled'",
+            colCount: 2,
+          },
+        ],
+      },
+    ],
+  },
+  on_finish: (data: any) => {
+    const response = data?.response ?? {};
+    const selectedParts = Array.isArray(response.debug_parts)
+      ? (response.debug_parts.filter((part: string) =>
+          debugPartValues.includes(part as DebugPart),
+        ) as DebugPart[])
+      : [...debugPartValues];
+
+    const group = response.debug_group as ParticipantGroup;
+    const nativeLanguage =
+      (response.debug_native_language as LanguageCode | undefined) ?? "de";
+
+    state.debugManualMode = true;
+    state.debugParts =
+      selectedParts.length > 0 ? selectedParts : [...debugPartValues];
+    state.participantId = state.participantId || makeParticipantId();
+    state.group = group === "late_bilingual" ? "late_bilingual" : "monolingual";
+    state.nativeLanguage = nativeLanguage;
+    state.eligible = true;
+
+    if (state.group === "late_bilingual") {
+      const version = (response.debug_task_version as TaskVersion) ?? "mixed";
+      state.taskVersion = version === "coupled" ? "coupled" : "mixed";
+      if (state.taskVersion === "coupled") {
+        const tbr =
+          (response.debug_tbr_language as LanguageCode | undefined) ?? "de";
+        state.tbrLanguage = tbr;
+        state.tbfLanguage = tbr === "de" ? "tr" : "de";
+      } else {
+        state.tbrLanguage = null;
+        state.tbfLanguage = null;
+      }
+    } else {
+      state.taskVersion = "monolingual";
+      state.tbrLanguage = null;
+      state.tbfLanguage = null;
+    }
+
+    jsPsych.data.addProperties({
+      participant_id: state.participantId,
+      group: state.group,
+      task_version: state.taskVersion ?? "unknown",
+      native_language: state.nativeLanguage ?? "unknown",
+      tbr_language: state.tbrLanguage ?? "none",
+      tbf_language: state.tbfLanguage ?? "none",
+      debug_manual_mode: true,
+      debug_parts: state.debugParts.join(","),
+    });
+  },
+});
+
+const shouldRunDebugPart = (state: ParticipantState, part: DebugPart) => {
+  if (!state.debugManualMode) {
+    return true;
+  }
+  return state.debugParts.includes(part);
+};
+
+const withConditional = (trial: any, predicate: () => boolean) => ({
+  timeline: [trial],
+  conditional_function: predicate,
+});
 
 const assignParticipant = (
   jsPsych: JsPsych,
   state: ParticipantState,
   response: Record<string, any>,
 ) => {
+<<<<<<< Updated upstream
   const native = response.native_language as LanguageCode | "other" | undefined;
   const spokenRaw = response.languages_spoken;
   const spoken: string[] = Array.isArray(spokenRaw) ? spokenRaw : [];
@@ -265,12 +520,46 @@ const assignParticipant = (
     nativeOk &&
     ((native === "de" && speaksDe && !speaksTr) ||
       (native === "tr" && speaksTr && !speaksDe))
+=======
+  const firstLanguage = response.first_language as
+    | LanguageCode
+    | "other"
+    | undefined;
+  const regularLanguages = (response.regular_languages ?? []) as
+    | string[]
+    | string;
+  const regularLanguageList = Array.isArray(regularLanguages)
+    ? regularLanguages
+    : regularLanguages
+      ? [regularLanguages]
+      : [];
+  const speaksDeRegularly = regularLanguageList.includes("de");
+  const speaksTrRegularly = regularLanguageList.includes("tr");
+  const germanAcquisitionAge = Number(response.acquisition_age_de);
+  const usesBoth = response.use_both_languages === "yes";
+
+  const firstLanguageOk = firstLanguage === "de" || firstLanguage === "tr";
+
+  let group: ParticipantGroup = "ineligible";
+  if (
+    firstLanguageOk &&
+    ((firstLanguage === "de" && !speaksTrRegularly) ||
+      (firstLanguage === "tr" && !speaksDeRegularly))
+  ) {
+    group = "monolingual";
+  } else if (
+    firstLanguageOk &&
+    speaksDeRegularly &&
+    speaksTrRegularly &&
+    (firstLanguage === "de" || germanAcquisitionAge > 7) &&
+    usesBoth
+>>>>>>> Stashed changes
   ) {
     group = "monolingual";
   }
 
   state.group = group;
-  state.nativeLanguage = nativeOk ? native : null;
+  state.nativeLanguage = firstLanguageOk ? firstLanguage : null;
   state.eligible = group !== "ineligible";
   state.participantId = state.participantId || makeParticipantId();
 
@@ -519,11 +808,12 @@ const buildStudyItems = (jsPsych: JsPsych, state: ParticipantState) => {
 };
 
 const buildTestItems = (jsPsych: JsPsych, state: ParticipantState) => {
-  const oldItems: TestItem[] = state.studyItems.map((item) => ({
+  const oldItems: TestItem[] = state.studyItems.map((item, index) => ({
     word: item.word,
     language: item.language,
     target: "old",
     itemStatus: item.itemStatus,
+    serialPosition: index + 1,
   }));
 
   if (state.group === "late_bilingual") {
@@ -540,13 +830,15 @@ const buildTestItems = (jsPsych: JsPsych, state: ParticipantState) => {
         word,
         language: "de" as const,
         target: "new" as const,
-        itemStatus: null,
+        itemStatus: "neu" as const,
+        serialPosition: 0,
       })),
       ...newTr.map((word) => ({
         word,
         language: "tr" as const,
         target: "new" as const,
-        itemStatus: null,
+        itemStatus: "neu" as const,
+        serialPosition: 0,
       })),
     ];
     return jsPsych.randomization.shuffle([...oldItems, ...newItems]);
@@ -561,7 +853,60 @@ const buildTestItems = (jsPsych: JsPsych, state: ParticipantState) => {
     word,
     language,
     target: "new",
-    itemStatus: null,
+    itemStatus: "neu",
+    serialPosition: 0,
+  }));
+  return jsPsych.randomization.shuffle([...oldItems, ...newItems]);
+};
+
+const buildPracticeTestItems = (jsPsych: JsPsych, state: ParticipantState) => {
+  const oldItems: TestItem[] = state.practiceItems.map((item, index) => ({
+    word: item.word,
+    language: item.language,
+    target: "old",
+    itemStatus: item.itemStatus,
+    serialPosition: index + 1,
+  }));
+
+  if (state.group === "late_bilingual") {
+    const newDe = jsPsych.randomization.sampleWithoutReplacement(
+      stimuli.de.new,
+      2,
+    );
+    const newTr = jsPsych.randomization.sampleWithoutReplacement(
+      stimuli.tr.new,
+      2,
+    );
+    const newItems: TestItem[] = [
+      ...newDe.map((word) => ({
+        word,
+        language: "de" as const,
+        target: "new" as const,
+        itemStatus: "neu" as const,
+        serialPosition: 0,
+      })),
+      ...newTr.map((word) => ({
+        word,
+        language: "tr" as const,
+        target: "new" as const,
+        itemStatus: "neu" as const,
+        serialPosition: 0,
+      })),
+    ];
+    return jsPsych.randomization.shuffle([...oldItems, ...newItems]);
+  }
+
+  const language = state.nativeLanguage ?? "de";
+  const newWords = jsPsych.randomization.sampleWithoutReplacement(
+    stimuli[language].new,
+    4,
+  );
+  const newItems: TestItem[] = newWords.map((word) => ({
+    word,
+    language,
+    target: "new",
+    itemStatus: "neu",
+    serialPosition: 0,
   }));
   return jsPsych.randomization.shuffle([...oldItems, ...newItems]);
 };
@@ -700,7 +1045,12 @@ const buildDistractor = (state: ParticipantState) => {
   };
 };
 
-const buildRecognitionBlock = (jsPsych: JsPsych, state: ParticipantState) => {
+const buildRecognitionBlock = (
+  jsPsych: JsPsych,
+  state: ParticipantState,
+  itemsGetter: () => TestItem[],
+  phase: "recognition" | "recognition_practice" = "recognition",
+) => {
   const responsePrompt = () => {
     const mode = getInstructionModeForRecognition(state);
     return getRecognitionPromptHtml(mode);
@@ -728,11 +1078,12 @@ const buildRecognitionBlock = (jsPsych: JsPsych, state: ParticipantState) => {
       });
     },
     data: {
-      phase: "recognition",
+      phase,
       word: jsPsych.timelineVariable("wordText"),
       language: jsPsych.timelineVariable("language"),
       target: jsPsych.timelineVariable("target"),
       item_status: jsPsych.timelineVariable("itemStatus"),
+      serial_position: jsPsych.timelineVariable("serialPosition"),
     },
     on_finish: (data: any) => {
       const isOld = data.target === "old";
@@ -746,12 +1097,13 @@ const buildRecognitionBlock = (jsPsych: JsPsych, state: ParticipantState) => {
     timeline: [trial],
     randomize_order: true,
     get timeline_variables() {
-      return state.testItems.map((item) => ({
+      return itemsGetter().map((item) => ({
         word: `<div class="word">${item.word}</div>`,
         wordText: item.word,
         language: item.language,
         target: item.target,
         itemStatus: item.itemStatus,
+        serialPosition: item.serialPosition,
       }));
     },
   };
@@ -866,6 +1218,25 @@ export const buildExperimentTimeline = (jsPsych: JsPsych) => {
   const isTest = studyConfig.testMode;
 
   const timeline: any[] = [];
+<<<<<<< Updated upstream
+=======
+  if (studyConfig.debug) {
+    timeline.push(makeDebugSetupSurvey(jsPsych, state));
+  }
+
+  timeline.push(
+    withConditional(
+      makeInstructionTrial("welcome", () => "both", "welcome", true),
+      () => shouldRunDebugPart(state, "welcome"),
+    ),
+  );
+
+  timeline.push(
+    withConditional(makeBackgroundSurvey(jsPsych, state), () =>
+      shouldRunDebugPart(state, "background"),
+    ),
+  );
+>>>>>>> Stashed changes
 
   // ---- Test-Mode selector (only when testMode is on) ----
   if (isTest) {
@@ -903,7 +1274,12 @@ export const buildExperimentTimeline = (jsPsych: JsPsych) => {
 
   timeline.push({
     timeline: [makeAbortTrial()],
+<<<<<<< Updated upstream
     conditional_function: () => !isTest && state.group === "ineligible",
+=======
+    conditional_function: () =>
+      !state.debugManualMode && state.group === "ineligible",
+>>>>>>> Stashed changes
   });
 
   // ---- Main experiment (only if eligible OR test mode) ----
@@ -912,24 +1288,48 @@ export const buildExperimentTimeline = (jsPsych: JsPsych) => {
   // Practice block
   timeline.push({
     timeline: [
-      makeInstructionTrial(
-        "general",
-        () => getInstructionModeForGeneral(state),
-        "general",
+      withConditional(
+        makeInstructionTrial(
+          "general",
+          () => getInstructionModeForGeneral(state),
+          "general",
+        ),
+        () => shouldRunDebugPart(state, "practice"),
       ),
+<<<<<<< Updated upstream
       makeInstructionTrial(
         "practice",
         () => getInstructionModeForGeneral(state),
         "practice",
+=======
+      withConditional(
+        makeInstructionTrial(
+          "learning",
+          () => getInstructionModeForGeneral(state),
+          "learning",
+        ),
+        () => shouldRunDebugPart(state, "practice"),
       ),
-      {
-        type: htmlKeyboardResponse,
-        stimulus: "",
-        choices: "NO_KEYS",
-        trial_duration: 0,
-        on_start: () => {
-          state.practiceItems = buildPracticeItems(jsPsych, state);
+      withConditional(
+        makeInstructionTrial(
+          "practice",
+          () => getInstructionModeForGeneral(state),
+          "practice",
+        ),
+        () => shouldRunDebugPart(state, "practice"),
+>>>>>>> Stashed changes
+      ),
+      withConditional(
+        {
+          type: htmlKeyboardResponse,
+          stimulus: "",
+          choices: "NO_KEYS",
+          trial_duration: 0,
+          on_start: () => {
+            state.practiceItems = buildPracticeItems(jsPsych, state);
+          },
         },
+<<<<<<< Updated upstream
       },
       buildStudyBlock(jsPsych, state, "practice"),
     ],
@@ -943,16 +1343,26 @@ export const buildExperimentTimeline = (jsPsych: JsPsych) => {
         "start_main",
         () => getInstructionModeForGeneral(state),
         "start_main",
+=======
+        () =>
+          shouldRunDebugPart(state, "practice") ||
+          shouldRunDebugPart(state, "practice_recognition"),
+>>>>>>> Stashed changes
       ),
-      {
-        type: htmlKeyboardResponse,
-        stimulus: "",
-        choices: "NO_KEYS",
-        trial_duration: 0,
-        on_start: () => {
-          state.studyItems = buildStudyItems(jsPsych, state);
-          state.testItems = buildTestItems(jsPsych, state);
+      withConditional(buildStudyBlock(jsPsych, state, "practice"), () =>
+        shouldRunDebugPart(state, "practice"),
+      ),
+      withConditional(
+        {
+          type: htmlKeyboardResponse,
+          stimulus: "",
+          choices: "NO_KEYS",
+          trial_duration: 0,
+          on_start: () => {
+            state.practiceTestItems = buildPracticeTestItems(jsPsych, state);
+          },
         },
+<<<<<<< Updated upstream
       },
       buildStudyBlock(jsPsych, state, "study"),
     ],
@@ -1003,6 +1413,84 @@ export const buildExperimentTimeline = (jsPsych: JsPsych) => {
       ),
     ],
     conditional_function: () => mainConditional() && tmWants(state, "end"),
+=======
+        () => shouldRunDebugPart(state, "practice_recognition"),
+      ),
+      withConditional(
+        makeInstructionTrial(
+          "practice_recognition",
+          () => getInstructionModeForRecognition(state),
+          "practice_recognition",
+        ),
+        () => shouldRunDebugPart(state, "practice_recognition"),
+      ),
+      withConditional(
+        buildRecognitionBlock(
+          jsPsych,
+          state,
+          () => state.practiceTestItems,
+          "recognition_practice",
+        ),
+        () => shouldRunDebugPart(state, "practice_recognition"),
+      ),
+      withConditional(
+        {
+          type: htmlKeyboardResponse,
+          stimulus: "",
+          choices: "NO_KEYS",
+          trial_duration: 0,
+          on_start: () => {
+            state.studyItems = buildStudyItems(jsPsych, state);
+            state.testItems = buildTestItems(jsPsych, state);
+          },
+        },
+        () =>
+          shouldRunDebugPart(state, "main_learning") ||
+          shouldRunDebugPart(state, "recognition"),
+      ),
+      withConditional(
+        makeInstructionTrial(
+          "start_main",
+          () => getInstructionModeForGeneral(state),
+          "start_main",
+        ),
+        () => shouldRunDebugPart(state, "main_learning"),
+      ),
+      withConditional(buildStudyBlock(jsPsych, state, "study"), () =>
+        shouldRunDebugPart(state, "main_learning"),
+      ),
+      withConditional(buildDistractor(state), () =>
+        shouldRunDebugPart(state, "distractor"),
+      ),
+      withConditional(
+        makeInstructionTrial(
+          "recognition",
+          () => getInstructionModeForRecognition(state),
+          "recognition",
+        ),
+        () => shouldRunDebugPart(state, "recognition"),
+      ),
+      withConditional(
+        buildRecognitionBlock(
+          jsPsych,
+          state,
+          () => state.testItems,
+          "recognition",
+        ),
+        () => shouldRunDebugPart(state, "recognition"),
+      ),
+      withConditional(
+        makeInstructionTrial(
+          "end",
+          () => getInstructionModeForGeneral(state),
+          "end",
+        ),
+        () => shouldRunDebugPart(state, "end"),
+      ),
+    ],
+    conditional_function: () =>
+      state.debugManualMode || state.group !== "ineligible",
+>>>>>>> Stashed changes
   });
 
   if (studyConfig.debug) {

@@ -1,5 +1,5 @@
 export const studyConfig = {
-  debug: false,
+  debug: true,
   dataEndpoint: "/data",
 
   /**
