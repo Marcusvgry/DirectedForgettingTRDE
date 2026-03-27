@@ -5,7 +5,7 @@ export const studyConfig = {
   /**
    * Testmodus: true = optionale Felder und lokaler CSV-Download am Ende.
    */
-  testMode: true,
+  testMode: false,
 
   /**
    * Zeigt die Test-Auswahlseite am Anfang.
