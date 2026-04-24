@@ -19,11 +19,23 @@ function generateRandomID(length = 15) {
 const app = express();
 
 const distPath = path.join(__dirname, "dist");
+const docsPath = path.join(__dirname, "docs");
 const publicPath = path.join(__dirname, "public");
-const staticRoot = fs.existsSync(distPath) ? distPath : publicPath;
+const buildRoots = [distPath, docsPath, publicPath];
+const staticRoot =
+  buildRoots.find((root) => fs.existsSync(path.join(root, "index.html"))) ??
+  publicPath;
+const appBase = (process.env.BASE_PATH || "/DirectedForgettingTRDE").replace(
+  /\/$/,
+  "",
+);
+const indexPath = path.join(staticRoot, "index.html");
 
-// Statische Verzeichnisse (dist bevorzugt)
+// Statische Verzeichnisse (dist/docs bevorzugt)
 app.use(express.static(staticRoot));
+if (appBase) {
+  app.use(appBase, express.static(staticRoot));
+}
 app.use("/assets", express.static(path.join(publicPath, "assets")));
 
 // Body parser über Express-Bordmittel
@@ -39,9 +51,18 @@ app.use(
 //  Routen
 // ================================
 
-app.get("/", (_req, res) => {
-  res.sendFile(path.join(staticRoot, "index.html"));
-});
+const sendIndex = (_req, res) => {
+  if (!fs.existsSync(indexPath)) {
+    return res.status(500).send(`index.html nicht gefunden: ${indexPath}`);
+  }
+  return res.sendFile(indexPath);
+};
+
+app.get("/", sendIndex);
+if (appBase) {
+  app.get(appBase, sendIndex);
+  app.get(`${appBase}/`, sendIndex);
+}
 
 // POST: data (CSV)
 app.post("/data", (req, res) => {

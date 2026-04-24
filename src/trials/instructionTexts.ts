@@ -114,10 +114,10 @@ export const instructionTexts: InstructionTexts = {
   `,
   ineligible_de: `
     <p>Vielen Dank für dein Interesse.</p>
-    <p>Basierend auf den Angaben gehörtst du leider nicht zur Zielgruppe dieser Studie.</p>
+    <p>Es haben schon genug monolinguale Personen teilgenommen, sodass wir leider nur noch nach bilingualen Teilnehmern suchen.</p>
   `,
   ineligible_tr: `
     <p>Ilginiz icin tesekkurler.</p>
-    <p>Verdiginiz bilgilere gore bu calismanin hedef grubuna uymuyorsunuz.</p>
+    <p>Bu calisma su anda yalnizca Almanca ve Turkce konusan iki dilli kisilere aciktir. Verdiginiz bilgilere gore bu calismanin hedef grubuna uymuyorsunuz.</p>
   `,
 };

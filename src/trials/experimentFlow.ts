@@ -328,18 +328,6 @@ const makeDebugSetupSurvey = (jsPsych: JsPsych, state: ParticipantState) => ({
           },
           {
             type: "radiogroup",
-            name: "debug_group",
-            title: "Gruppe",
-            isRequired: true,
-            choices: [
-              { value: "monolingual", text: "Monolingual" },
-              { value: "late_bilingual", text: "Late bilingual" },
-            ],
-            defaultValue: "late_bilingual",
-            colCount: 0,
-          },
-          {
-            type: "radiogroup",
             name: "debug_native_language",
             title: "Hauptsprache fuer Instruktionen",
             isRequired: true,
@@ -359,7 +347,6 @@ const makeDebugSetupSurvey = (jsPsych: JsPsych, state: ParticipantState) => ({
               { value: "mixed", text: "Mixed" },
             ],
             defaultValue: "mixed",
-            visibleIf: "{debug_group} = 'late_bilingual'",
             colCount: 2,
           },
           {
@@ -371,8 +358,7 @@ const makeDebugSetupSurvey = (jsPsych: JsPsych, state: ParticipantState) => ({
               { value: "tr", text: "Tuerkisch" },
             ],
             defaultValue: "de",
-            visibleIf:
-              "{debug_group} = 'late_bilingual' and {debug_task_version} = 'coupled'",
+            visibleIf: "{debug_task_version} = 'coupled'",
             colCount: 2,
           },
         ],
@@ -387,7 +373,6 @@ const makeDebugSetupSurvey = (jsPsych: JsPsych, state: ParticipantState) => ({
         ) as DebugPart[])
       : [...debugPartValues];
 
-    const group = response.debug_group as ParticipantGroup;
     const nativeLanguage =
       (response.debug_native_language as LanguageCode | undefined) ?? "de";
 
@@ -395,24 +380,18 @@ const makeDebugSetupSurvey = (jsPsych: JsPsych, state: ParticipantState) => ({
     state.debugParts =
       selectedParts.length > 0 ? selectedParts : [...debugPartValues];
     state.participantId = state.participantId || makeParticipantId();
-    state.group = group === "late_bilingual" ? "late_bilingual" : "monolingual";
+    state.group = "late_bilingual";
     state.nativeLanguage = nativeLanguage;
     state.eligible = true;
 
-    if (state.group === "late_bilingual") {
-      const version = (response.debug_task_version as TaskVersion) ?? "mixed";
-      state.taskVersion = version === "coupled" ? "coupled" : "mixed";
-      if (state.taskVersion === "coupled") {
-        const tbr =
-          (response.debug_tbr_language as LanguageCode | undefined) ?? "de";
-        state.tbrLanguage = tbr;
-        state.tbfLanguage = tbr === "de" ? "tr" : "de";
-      } else {
-        state.tbrLanguage = null;
-        state.tbfLanguage = null;
-      }
+    const version = (response.debug_task_version as TaskVersion) ?? "mixed";
+    state.taskVersion = version === "coupled" ? "coupled" : "mixed";
+    if (state.taskVersion === "coupled") {
+      const tbr =
+        (response.debug_tbr_language as LanguageCode | undefined) ?? "de";
+      state.tbrLanguage = tbr;
+      state.tbfLanguage = tbr === "de" ? "tr" : "de";
     } else {
-      state.taskVersion = "monolingual";
       state.tbrLanguage = null;
       state.tbfLanguage = null;
     }
@@ -464,12 +443,6 @@ const assignParticipant = (
     if (l2Age > 7) {
       group = "late_bilingual";
     }
-  } else if (
-    nativeOk &&
-    ((native === "de" && speaksDe && !speaksTr) ||
-      (native === "tr" && speaksTr && !speaksDe))
-  ) {
-    group = "monolingual";
   }
 
   state.group = group;
@@ -494,10 +467,6 @@ const assignParticipant = (
       state.tbrLanguage = null;
       state.tbfLanguage = null;
     }
-  } else if (group === "monolingual") {
-    state.taskVersion = "monolingual";
-    state.tbrLanguage = null;
-    state.tbfLanguage = null;
   } else {
     state.taskVersion = null;
     state.tbrLanguage = null;
@@ -1068,13 +1037,6 @@ const buildTestModeSelector = (jsPsych: JsPsych, state: ParticipantState) => ({
           ${checkboxes}
         </fieldset>
         <fieldset>
-          <legend>Gruppe</legend>
-          <select id="tm-group">
-            <option value="monolingual">Monolingual</option>
-            <option value="late_bilingual">Late Bilingual</option>
-          </select>
-        </fieldset>
-        <fieldset>
           <legend>Muttersprache</legend>
           <select id="tm-native">
             <option value="de">Deutsch</option>
@@ -1091,8 +1053,7 @@ const buildTestModeSelector = (jsPsych: JsPsych, state: ParticipantState) => ({
           'input[name="trial"]:checked',
         ),
       ).map((el) => el.value);
-      const group = (document.getElementById("tm-group") as HTMLSelectElement)
-        .value as ParticipantGroup;
+      const group: ParticipantGroup = "late_bilingual";
       const native = (document.getElementById("tm-native") as HTMLSelectElement)
         .value as LanguageCode;
 
@@ -1108,25 +1069,19 @@ const buildTestModeSelector = (jsPsych: JsPsych, state: ParticipantState) => ({
       state.eligible = true;
       state.participantId = makeParticipantId();
 
-      if (group === "late_bilingual") {
-        const version = jsPsych.randomization.sampleWithoutReplacement(
-          ["coupled", "mixed"],
+      const version = jsPsych.randomization.sampleWithoutReplacement(
+        ["coupled", "mixed"],
+        1,
+      )[0] as TaskVersion;
+      state.taskVersion = version;
+      if (version === "coupled") {
+        const tbr = jsPsych.randomization.sampleWithoutReplacement(
+          ["de", "tr"],
           1,
-        )[0] as TaskVersion;
-        state.taskVersion = version;
-        if (version === "coupled") {
-          const tbr = jsPsych.randomization.sampleWithoutReplacement(
-            ["de", "tr"],
-            1,
-          )[0] as LanguageCode;
-          state.tbrLanguage = tbr;
-          state.tbfLanguage = tbr === "de" ? "tr" : "de";
-        } else {
-          state.tbrLanguage = null;
-          state.tbfLanguage = null;
-        }
+        )[0] as LanguageCode;
+        state.tbrLanguage = tbr;
+        state.tbfLanguage = tbr === "de" ? "tr" : "de";
       } else {
-        state.taskVersion = "monolingual";
         state.tbrLanguage = null;
         state.tbfLanguage = null;
       }
